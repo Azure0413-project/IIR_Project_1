@@ -86,7 +86,7 @@ model = FastLanguageModel.get_peft_model(
 )
 
 import wandb
-wandb.login(key="0fc9b0afa729d0aff22088c9788ccf473893d242")  # 替換成你的 API Key
+wandb.login(key="")  # 替換成你的 API Key
 
 training_args = ORPOConfig(
     per_device_train_batch_size=2,  # 根據 GPU 記憶體調整
