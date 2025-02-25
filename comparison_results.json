@@ -1,0 +1,27 @@
+[
+    {
+        "question": "Solve the equation: x^2 - 4x + 4 = 0",
+        "base_answer": "Solve the equation: x^2 - 4x + 4 = 0\n\n## Want to see this answer and more?\nExperts are waiting 24/7 to provide step-by-step solutions in as fast as 30 minutes!*\n\n## Related Algebra Q&A\nQ: 1. Find the inverse of the following matrix, if it exists. A = 2 1 1 1 (10%) 2. Consider the linea...\nA: As a first step let us write the version of the",
+        "fine_tuned_answer": "Solve the equation: x^2 - 4x + 4 = 0.\n\nSolve the equation: x^2 - 4x + 4 = 0.\n\n### Solution:\n\nTo solve the equation $x^2 - 4x + 4 = 0$, we can use the quadratic formula:\n\n$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$\n\nIn this equation, $a = 1$, $b = -4$, and $"
+    },
+    {
+        "question": "What is the derivative of sin(x)?",
+        "base_answer": "What is the derivative of sin(x)?\n- 10\n- 1\n- cos(x)\n- -cos(x)\nWhat is the derivative of cos(x)?\n- 10\n- 1\n- -sin(x)\n- sin(x)\nWhat is the derivative of tan(x)?\n- 10\n- 1\n- sec2(x)\n- -sec2(x)\nWhat is the derivative of sec(x)?\n-",
+        "fine_tuned_answer": "What is the derivative of sin(x)?\n\nMay 1, 2018\n\n$\\frac{d}{\\mathrm{dx}} \\sin \\left(x\\right) = \\cos \\left(x\\right)$\n\nExplanation:\n\nThe derivative of $\\sin \\left(x\\right)$ is $\\cos \\left(x\\right)$.\n\nThis can be proven using the definition of the derivative:\n\n$\\frac{d}{\\mathrm{dx}} \\sin \\left(x\\"
+    },
+    {
+        "question": "Integrate 3x^2 + 2x + 1 with respect to x.",
+        "base_answer": "Integrate 3x^2 + 2x + 1 with respect to x.\n\n## Solution\n\nWe have,\n\n$\\int \\left(3x^2 + 2x + 1\\right) dx$\n\n$= \\int 3x^2 dx + \\int 2x dx + \\int 1 dx$\n\n$= 3\\int x^2 dx + 2\\int x dx + \\int 1 dx$\n\n$= 3\\left(\\dfrac{x^3}{3}\\right)",
+        "fine_tuned_answer": "Integrate 3x^2 + 2x + 1 with respect to x.\n\n## Solution:\n\n### Step 1:\n\nThe given function is 3x^2 + 2x + 1.\n\n### Step 2:\n\nIntegrate the function with respect to x.\n\n### Step 3:\n\nIntegrate each term of the function separately.\n\n### Step 4:\n\nIntegrate the first term:\n\n### Step 5:\n\nIntegrate the second term:\n\n###"
+    },
+    {
+        "question": "Find the determinant of the matrix [[1,2],[3,4]].",
+        "base_answer": "Find the determinant of the matrix [[1,2],[3,4]].\nFind the determinant of the matrix [[1,2],[3,4]].\n\n## Want to see this answer and more?\nExperts are waiting 24/7 to provide step-by-step solutions in as fast as 30 minutes!*\n\n## Related Algebra Q&A\nQ: 1. Find the inverse of the following matrix, if it exists. (If not, enter DNE in the answer box.) 3...\nA: The",
+        "fine_tuned_answer": "Find the determinant of the matrix [[1,2],[3,4]].\n\n## Solution:\n\nThe determinant of a 2x2 matrix is given by:\n\ndet(A) = ad - bc\n\nwhere A = [[a, b], [c, d]]\n\nIn this case, a = 1, b = 2, c = 3, and d = 4.\n\nSo, det(A) = 1 * 4 - 2 * 3 = 4 - 6 = -"
+    },
+    {
+        "question": "What is the Taylor series expansion of e^x?",
+        "base_answer": "What is the Taylor series expansion of e^x?\n\nThe Taylor series expansion of e^x is:\n\ne^x = 1 + x + x^2/2! + x^3/3! + x^4/4! + ...\n\nThis series is an infinite series that converges to the value of e^x for all real values of x.\n\nWhat is the Taylor series expansion of sin(x)?\n\nThe Taylor series expansion of sin(x) is:\n\nsin(x",
+        "fine_tuned_answer": "What is the Taylor series expansion of e^x?\n\nThe Taylor series expansion of e^x is:\n\ne^x = 1 + x + (x^2)/2! + (x^3)/3! + (x^4)/4! + ...\n\nThis series is an infinite sum of terms, where each term is a fraction of the previous term. The numerator is always x^n, where n is the term number, and the denominator is n!.\n\nThe Taylor series expansion of e^"
+    }
+]
