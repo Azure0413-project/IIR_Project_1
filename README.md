@@ -4,7 +4,7 @@
 1. 要解壓縮safetensors，且放入的時候只要檔案就好，不要有資料夾  
 2. deepseek-math-7b-orpo-lora  
 檔案結構為  
-./deepseek-math-7b-orpo-lora   
+./deepseek-math-7b-orpo-lora    
 ./deepseek-math-7b-orpo-lora/safetensors  
 ./deepseek-math-7b-orpo-lora/checkpoint
 
