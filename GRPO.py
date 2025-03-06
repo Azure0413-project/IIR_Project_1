@@ -180,7 +180,7 @@ training_args = GRPOConfig(
     max_grad_norm = 1.0,
     save_strategy="epoch",
     report_to = "wandb", # Can use Weights & Biases
-    output_dir = "./deepseek-math-7b-grpo-lora",
+    output_dir = "./deepseek-math-7b-grpo-lora_v2",
 )
 
 trainer = GRPOTrainer(
@@ -192,7 +192,7 @@ trainer = GRPOTrainer(
 )
 trainer.train()
 
-model.save_lora("./grpo_saved_lora_ds_v2")
+model.save_lora("./deepseek-math-7b-grpo-lora_v2")
 # ####################################################################
 # # Inference
 # ####################################################################
