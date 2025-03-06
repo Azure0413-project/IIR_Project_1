@@ -190,7 +190,7 @@ trainer = GRPOTrainer(
 )
 trainer.train()
 
-model.save_lora("./unsloth/grpo_training/grpo_saved_lora_ds")
+model.save_lora("./grpo_saved_lora_ds")
 # ####################################################################
 # # Inference
 # ####################################################################
