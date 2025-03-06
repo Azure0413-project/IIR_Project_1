@@ -191,66 +191,66 @@ trainer = GRPOTrainer(
 trainer.train()
 
 model.save_lora("./unsloth/grpo_training/grpo_saved_lora_ds")
-####################################################################
-# Inference
-####################################################################
-import json
-from vllm import SamplingParams
+# ####################################################################
+# # Inference
+# ####################################################################
+# import json
+# from vllm import SamplingParams
 
-questions = [
-    "Solve the equation: x^2 - 4x + 4 = 0",
-    "What is the derivative of sin(x)?",
-    "Integrate 3x^2 + 2x + 1 with respect to x.",
-    "Find the determinant of the matrix [[1,2],[3,4]].",
-    "What is the Taylor series expansion of e^x?",
-]
+# questions = [
+#     "Solve the equation: x^2 - 4x + 4 = 0",
+#     "What is the derivative of sin(x)?",
+#     "Integrate 3x^2 + 2x + 1 with respect to x.",
+#     "Find the determinant of the matrix [[1,2],[3,4]].",
+#     "What is the Taylor series expansion of e^x?",
+# ]
 
-# 設定採樣參數
-sampling_params = SamplingParams(
-    temperature=0.8,
-    top_p=0.95,
-    max_tokens=1024,
-)
+# # 設定採樣參數
+# sampling_params = SamplingParams(
+#     temperature=0.8,
+#     top_p=0.95,
+#     max_tokens=1024,
+# )
 
-results = []
+# results = []
 
-for question in questions:
-    print(f"Processing: {question}")
+# for question in questions:
+#     print(f"Processing: {question}")
 
-    # 生成基礎模型回答
-    text = tokenizer.apply_chat_template([
-        {"role": "user", "content": question},
-    ], tokenize=False, add_generation_prompt=True)
+#     # 生成基礎模型回答
+#     text = tokenizer.apply_chat_template([
+#         {"role": "user", "content": question},
+#     ], tokenize=False, add_generation_prompt=True)
 
-    based_answer = model.fast_generate(
-        [text],
-        sampling_params=sampling_params,
-        lora_request=None,
-    )[0].outputs[0].text
+#     based_answer = model.fast_generate(
+#         [text],
+#         sampling_params=sampling_params,
+#         lora_request=None,
+#     )[0].outputs[0].text
 
-    # 生成微調後模型回答
-    text = tokenizer.apply_chat_template([
-        {"role": "system", "content": SYSTEM_PROMPT},
-        {"role": "user", "content": question},
-    ], tokenize=False, add_generation_prompt=True)
+#     # 生成微調後模型回答
+#     text = tokenizer.apply_chat_template([
+#         {"role": "system", "content": SYSTEM_PROMPT},
+#         {"role": "user", "content": question},
+#     ], tokenize=False, add_generation_prompt=True)
 
-    fine_tuned_answer = model.fast_generate(
-        [text],
-        sampling_params=sampling_params,
-        lora_request=model.load_lora("./unsloth/grpo_saved_lora"),
-    )[0].outputs[0].text
+#     fine_tuned_answer = model.fast_generate(
+#         [text],
+#         sampling_params=sampling_params,
+#         lora_request=model.load_lora("./unsloth/grpo_saved_lora"),
+#     )[0].outputs[0].text
 
-    # 儲存結果
-    results.append({
-        "question": question,
-        "based_answer": based_answer,
-        "fine_tuned_answer": fine_tuned_answer
-    })
+#     # 儲存結果
+#     results.append({
+#         "question": question,
+#         "based_answer": based_answer,
+#         "fine_tuned_answer": fine_tuned_answer
+#     })
 
-# 轉換成 JSON 並輸出
-output_filename = "generated_answers.json"
+# # 轉換成 JSON 並輸出
+# output_filename = "generated_answers.json"
 
-with open(output_filename, "w", encoding="utf-8") as json_file:
-    json.dump(results, json_file, indent=4, ensure_ascii=False)
+# with open(output_filename, "w", encoding="utf-8") as json_file:
+#     json.dump(results, json_file, indent=4, ensure_ascii=False)
 
-print(f"JSON file saved as {output_filename}")
+# print(f"JSON file saved as {output_filename}")
