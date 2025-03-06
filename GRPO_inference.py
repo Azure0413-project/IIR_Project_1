@@ -66,5 +66,5 @@ for question in questions:
 
 import json
 
-with open("comparison_results.json", "w") as f:
+with open("GRPO_v1_comparison_results.json", "w") as f:
     json.dump(results, f, indent=4)
