@@ -86,13 +86,14 @@ def correctness_reward(prompts, completions, ground_truths, rejected, **kwargs):
         similarity_chosen = fuzz.ratio(completion, ground_truth)
         similarity_rejected = fuzz.ratio(completion, rejected)
 
-        # Assign rewards based on similarity to the chosen and rejected responses
-        if similarity_chosen >= 90:
-            reward = 2.0  # Very close match to the chosen response
-        elif similarity_chosen >= 70:
-            reward = 1.0  # Partial match to the chosen response
-        else:
-            reward = 0.0  # Poor match to the chosen response
+        # # Assign rewards based on similarity to the chosen and rejected responses
+        # if similarity_chosen >= 90:
+        #     reward = 2.0  # Very close match to the chosen response
+        # elif similarity_chosen >= 70:
+        #     reward = 1.0  # Partial match to the chosen response
+        # else:
+        #     reward = 0.0  # Poor match to the chosen response
+        reward = np.interp(similarity_chosen, [50, 100], [0, 2.0])
         
         # Penalize if the completion is closer to the rejected response
         if similarity_rejected >= 70:
@@ -115,9 +116,10 @@ def relative_preference_reward(prompts, completions, chosen, rejected, **kwargs)
         sim_rejected = fuzz.ratio(completion, rejected)
 
         # Reward based on relative preference
-        reward = sim_chosen - sim_rejected
-        reward = np.clip(reward, -1.0, 2.0)  # Clipping rewards for stability
-
+        # reward = sim_chosen - sim_rejected
+        # reward = np.clip(reward, -1.0, 2.0)  # Clipping rewards for stability
+        reward = np.clip(reward, -2.0, 2.0)
+        
         rewards.append(reward)
 
     return rewards
@@ -156,7 +158,7 @@ reward_funcs = [
 
 training_args = GRPOConfig(
     # use_vllm = True, # use vLLM for fast inference!
-    learning_rate = 2e-4,
+    learning_rate = 5e-6,
     adam_beta1 = 0.9,
     adam_beta2 = 0.99,
     weight_decay = 0.01,
@@ -172,13 +174,13 @@ training_args = GRPOConfig(
     # num_generations = 0, # Decrease if out of memory
     max_prompt_length = 512,
     max_completion_length = 512,
-    num_train_epochs = 1, # Set to 1 for a full training run
-    max_steps = 500,
+    num_train_epochs = 3, # Set to 1 for a full training run
+    max_steps = 2000,
     save_steps = 250,
     max_grad_norm = 1.0,
     save_strategy="epoch",
     report_to = "wandb", # Can use Weights & Biases
-    output_dir = "./unsloth/grpo_training",
+    output_dir = "./deepseek-math-7b-grpo-lora",
 )
 
 trainer = GRPOTrainer(
@@ -190,7 +192,7 @@ trainer = GRPOTrainer(
 )
 trainer.train()
 
-model.save_lora("./grpo_saved_lora_ds")
+model.save_lora("./grpo_saved_lora_ds_v2")
 # ####################################################################
 # # Inference
 # ####################################################################
