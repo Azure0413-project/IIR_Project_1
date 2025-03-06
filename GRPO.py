@@ -10,6 +10,8 @@ PatchFastRL("GRPO", FastLanguageModel)
 import wandb
 # wandb.login(key="")
 # wandb.init(project="", entity='', name=)
+task_name="GRPO_v2"
+wandb.init(project="LLM_GRPO", entity='q56134102-national-cheng-kung-university-co-op', name=task_name)
 
 ####################################################################
 # Settings
