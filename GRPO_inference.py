@@ -4,7 +4,7 @@ from transformers import AutoTokenizer, TextStreamer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model_name = "deepseek-ai/deepseek-math-7b-base"
-finetune_model_name = "deepseek-math-7b-GRPO-lora"
+finetune_model_name = "deepseek-math-7b-grpo-lora"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token 
