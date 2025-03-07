@@ -54,22 +54,29 @@ Before answering, think carefully about the question and create a step-by-step c
 </think>
 {}"""
 
+def format_prompt(example):
+        question = example['question']
+        chosen_answer = example['chosen']
+        
+        formatted_prompt = SYSTEM_PROMPT.format(question, "", chosen_answer)  # No intermediate thoughts in training
+        return {
+            'prompt': formatted_prompt,
+            'chosen': chosen_answer,
+            'ground_truths': chosen_answer,  # Assuming the "chosen" answer is correct
+            'rejected': example['rejected']
+        }
+        
 def get_orca_dpo_pairs_questions(split="train") -> Dataset:
     data = load_dataset('Intel/orca_dpo_pairs')[split]  # 載入資料集
-    # print("data before slicing\n", data)
-
+    
+    #######################################################
+    # Optional slicing for testing
     if len(data) > 1:
-        data = data.select(range(1, len(data)))
-    # print("data after slicing\n", data)
+         data = data.select(range(1, len(data)))
+        # data = data.select(range(1, 2))
+    #######################################################
     
-    data = data.map(lambda x: {
-        'prompt': str(x['question']),
-        'chosen': str(x['chosen']),
-        'ground_truths': str(x['chosen']),
-        'rejected': str(x['rejected'])
-    })
-    
-    # print("data after mapping\n", data)
+    data = data.map(format_prompt)  # Apply the SYSTEM_PROMPT formatting
     return data
 
 dataset = get_orca_dpo_pairs_questions()
@@ -85,7 +92,8 @@ def correctness_reward(prompts, completions, ground_truths, rejected, **kwargs):
         # Compute similarity score (0 to 100)
         similarity_chosen = fuzz.ratio(completion, ground_truth)
         similarity_rejected = fuzz.ratio(completion, rejected)
-
+        
+        #######################################################
         # # Assign rewards based on similarity to the chosen and rejected responses
         # if similarity_chosen >= 90:
         #     reward = 2.0  # Very close match to the chosen response
@@ -94,6 +102,7 @@ def correctness_reward(prompts, completions, ground_truths, rejected, **kwargs):
         # else:
         #     reward = 0.0  # Poor match to the chosen response
         reward = np.interp(similarity_chosen, [50, 100], [0, 2.0])
+        #######################################################
         
         # Penalize if the completion is closer to the rejected response
         if similarity_rejected >= 70:
@@ -115,10 +124,12 @@ def relative_preference_reward(prompts, completions, chosen, rejected, **kwargs)
         sim_chosen = fuzz.ratio(completion, chosen)
         sim_rejected = fuzz.ratio(completion, rejected)
 
+        #######################################################
         # Reward based on relative preference
-        # reward = sim_chosen - sim_rejected
+        reward = sim_chosen - sim_rejected
         # reward = np.clip(reward, -1.0, 2.0)  # Clipping rewards for stability
         reward = np.clip(reward, -2.0, 2.0)
+        #######################################################
         
         rewards.append(reward)
 
@@ -158,7 +169,7 @@ reward_funcs = [
 
 training_args = GRPOConfig(
     # use_vllm = True, # use vLLM for fast inference!
-    learning_rate = 5e-6,
+    learning_rate = 2e-4,
     adam_beta1 = 0.9,
     adam_beta2 = 0.99,
     weight_decay = 0.01,
@@ -176,7 +187,7 @@ training_args = GRPOConfig(
     max_completion_length = 512,
     num_train_epochs = 3, # Set to 1 for a full training run
     max_steps = 2000,
-    save_steps = 250,
+    save_steps = 200,
     max_grad_norm = 1.0,
     save_strategy="epoch",
     report_to = "wandb", # Can use Weights & Biases
@@ -192,67 +203,5 @@ trainer = GRPOTrainer(
 )
 trainer.train()
 
-model.save_lora("./deepseek-math-7b-grpo-lora_v2")
-# ####################################################################
-# # Inference
-# ####################################################################
-# import json
-# from vllm import SamplingParams
-
-# questions = [
-#     "Solve the equation: x^2 - 4x + 4 = 0",
-#     "What is the derivative of sin(x)?",
-#     "Integrate 3x^2 + 2x + 1 with respect to x.",
-#     "Find the determinant of the matrix [[1,2],[3,4]].",
-#     "What is the Taylor series expansion of e^x?",
-# ]
-
-# # 設定採樣參數
-# sampling_params = SamplingParams(
-#     temperature=0.8,
-#     top_p=0.95,
-#     max_tokens=1024,
-# )
-
-# results = []
-
-# for question in questions:
-#     print(f"Processing: {question}")
-
-#     # 生成基礎模型回答
-#     text = tokenizer.apply_chat_template([
-#         {"role": "user", "content": question},
-#     ], tokenize=False, add_generation_prompt=True)
-
-#     based_answer = model.fast_generate(
-#         [text],
-#         sampling_params=sampling_params,
-#         lora_request=None,
-#     )[0].outputs[0].text
-
-#     # 生成微調後模型回答
-#     text = tokenizer.apply_chat_template([
-#         {"role": "system", "content": SYSTEM_PROMPT},
-#         {"role": "user", "content": question},
-#     ], tokenize=False, add_generation_prompt=True)
-
-#     fine_tuned_answer = model.fast_generate(
-#         [text],
-#         sampling_params=sampling_params,
-#         lora_request=model.load_lora("./unsloth/grpo_saved_lora"),
-#     )[0].outputs[0].text
-
-#     # 儲存結果
-#     results.append({
-#         "question": question,
-#         "based_answer": based_answer,
-#         "fine_tuned_answer": fine_tuned_answer
-#     })
-
-# # 轉換成 JSON 並輸出
-# output_filename = "generated_answers.json"
-
-# with open(output_filename, "w", encoding="utf-8") as json_file:
-#     json.dump(results, json_file, indent=4, ensure_ascii=False)
-
-# print(f"JSON file saved as {output_filename}")
+# model.save_lora("./deepseek-math-7b-grpo-lora_v2")
+model.save_pretrained("./deepseek-math-7b-grpo-lora_v2")
