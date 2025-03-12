@@ -24,18 +24,16 @@ At last print the final answer only.
 </think>
 {}"""
 
-def correctness_relative_reward(prompts, completions, chosen, rejected, **kwargs):
-    correctness_weight = 0.3
-    preference_weight = 0.7
+def correctness_reward(prompts, completions, ground_truths, rejected, **kwargs):
     rewards = []
-    for completion, chosen, rejected in zip(completions, chosen, rejected):
+    for completion, ground_truth, rejected in zip(completions, ground_truths, rejected):
         # Normalize text: remove extra spaces & lowercase
         completion = completion.strip().lower()
-        chosen = chosen.strip().lower()
+        ground_truth = ground_truth.strip().lower()
         rejected = rejected.strip().lower()
 
         # Compute similarity score (0 to 100)
-        similarity_chosen = fuzz.ratio(completion, chosen)
+        similarity_chosen = fuzz.ratio(completion, ground_truth)
         similarity_rejected = fuzz.ratio(completion, rejected)
         
         #######################################################
@@ -46,18 +44,36 @@ def correctness_relative_reward(prompts, completions, chosen, rejected, **kwargs
         #     reward = 1.0  # Partial match to the chosen response
         # else:
         #     reward = 0.0  # Poor match to the chosen response
-        correctness = np.interp(similarity_chosen, [50, 100], [0, 2.0])
+        reward = np.interp(similarity_chosen, [50, 100], [0, 2.0])
         #######################################################
+        
         # Penalize if the completion is closer to the rejected response
         if similarity_rejected >= 70:
-            correctness -= 2.0  # Decrease reward for poor preference alignment
+            reward -= 1.0  # Decrease reward for poor preference alignment
         
+        rewards.append(reward)
+
+    return rewards
+
+def relative_preference_reward(prompts, completions, chosen, rejected, **kwargs):
+    rewards = []
+    for completion, chosen, rejected in zip(completions, chosen, rejected):
+        # Normalize and compare similarity to both the chosen and rejected responses
+        completion = completion.strip().lower()
+        chosen = chosen.strip().lower()
+        rejected = rejected.strip().lower()
+
+        # Compute similarity scores
+        sim_chosen = fuzz.ratio(completion, chosen)
+        sim_rejected = fuzz.ratio(completion, rejected)
+
+        #######################################################
         # Reward based on relative preference
-        preference = similarity_chosen - similarity_rejected
+        reward = sim_chosen - sim_rejected
         # reward = np.clip(reward, -1.0, 2.0)  # Clipping rewards for stability
-        preference = np.clip(preference, -2.0, 2.0)
+        reward = np.clip(reward, -2.0, 2.0)
+        #######################################################
         
-        reward = correctness * correctness_weight + preference * preference_weight
         rewards.append(reward)
 
     return rewards
@@ -83,9 +99,10 @@ def logical_structure_reward(prompts, completions, **kwargs):
     return rewards
 
 reward_funcs = [
-    correctness_relative_reward,           # Correctness based on similarity to chosen/rejected responses
-    bilingual_reward,             # Reward for bilingual completion
-    logical_structure_reward      # Reward for logical reasoning in completions
+    correctness_reward,           
+    relative_preference_reward, 
+    bilingual_reward,             
+    logical_structure_reward      
 ]
 
 training_args = GRPOConfig(
@@ -117,7 +134,9 @@ training_args = GRPOConfig(
 
 
 max_seq_length = 2048
-lora_rank = 64
+#####################################################
+lora_rank = 8
+#####################################################
 model_name = "deepseek-ai/deepseek-math-7b-base"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
