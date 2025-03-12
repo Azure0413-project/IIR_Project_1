@@ -13,7 +13,6 @@ import wandb
 
 SYSTEM_PROMPT = """You are a helpful assistant. Respond accordingly.
 Before answering, think carefully about the question and create a step-by-step chain of thoughts to ensure a logical and accurate response.
-At last print the final answer only.
 
 ### Question:
 {}
@@ -58,29 +57,6 @@ def correctness_relative_reward(prompts, completions, chosen, rejected, **kwargs
         preference = np.clip(preference, -2.0, 2.0)
         
         reward = correctness * correctness_weight + preference * preference_weight
-        rewards.append(reward)
-
-    return rewards
-
-def relative_preference_reward(prompts, completions, chosen, rejected, **kwargs):
-    rewards = []
-    for completion, chosen, rejected in zip(completions, chosen, rejected):
-        # Normalize and compare similarity to both the chosen and rejected responses
-        completion = completion.strip().lower()
-        chosen = chosen.strip().lower()
-        rejected = rejected.strip().lower()
-
-        # Compute similarity scores
-        sim_chosen = fuzz.ratio(completion, chosen)
-        sim_rejected = fuzz.ratio(completion, rejected)
-
-        #######################################################
-        # Reward based on relative preference
-        reward = sim_chosen - sim_rejected
-        # reward = np.clip(reward, -1.0, 2.0)  # Clipping rewards for stability
-        reward = np.clip(reward, -2.0, 2.0)
-        #######################################################
-        
         rewards.append(reward)
 
     return rewards
