@@ -145,7 +145,7 @@ training_args = GRPOConfig(
 
 max_seq_length = 2048
 #####################################################
-lora_rank = 8
+lora_rank = 16
 #####################################################
 model_name = "deepseek-ai/deepseek-math-7b-base"
 
