@@ -64,21 +64,49 @@ def correctness_relative_reward(prompts, completions, chosen, rejected, **kwargs
 def bilingual_reward(prompts, completions, **kwargs):
     rewards = []
     for completion in completions:
-        # Check for the presence of both English and Chinese characters
+        # Check for presence of English and Chinese characters
         contains_english = regex.search(r'[a-zA-Z]', completion) is not None
         contains_chinese = regex.search(r'\p{sc=Han}', completion) is not None
-        rewards.append(1.0 if contains_english and contains_chinese else 0.5)
+
+        if contains_english and contains_chinese:
+            reward = 0.5  # Penalize mixed-language responses if the goal is single-language completions
+        elif contains_english or contains_chinese:
+            reward = 1.0  # Full reward if response is in either English or Chinese
+        else:
+            reward = 0.0  # No reward if neither language is detected
+
+        rewards.append(reward)
+    
     return rewards
 
 def logical_structure_reward(prompts, completions, **kwargs):
+    soft_weight=0.5
+    hard_weight=0.5
+    content_bonus=0.5
     rewards = []
     for completion in completions:
-        # Reward based on the presence of step-by-step reasoning tags
-        if "<think>" in completion and "</think>" in completion:
-            reward = 1.0  # Full reward for reasoning tags
-        else:
-            reward = 0.5  # Partial reward if reasoning tags are not present
+        has_tags = "<think>" in completion and "</think>" in completion
+        
+        # Soft standard: 1.0 if tags present, 0.5 otherwise
+        soft_reward = 1.0 if has_tags else 0.5
+
+        # Hard standard: 1.0 if tags present, 0.0 otherwise
+        hard_reward = 1.0 if has_tags else 0.0
+        
+        # Extract content inside <think>...</think>
+        match = re.search(r"<think>(.*?)</think>", completion, re.DOTALL)
+        inside_content = match.group(1).strip() if match else ""
+
+        # Check if meaningful content exists
+        has_content = bool(inside_content) and len(inside_content) > 3  # Ignore empty or too short content
+
+        # Bonus for meaningful content inside <think></think>
+        content_reward = content_bonus if has_content else 0.0
+
+        # Combined reward with weightings
+        reward = (soft_weight * soft_reward) + (hard_weight * hard_reward) + content_reward
         rewards.append(reward)
+
     return rewards
 
 reward_funcs = [
@@ -106,12 +134,12 @@ training_args = GRPOConfig(
     max_prompt_length = 512,
     max_completion_length = 512,
     num_train_epochs = 1, # Set to 1 for a full training run
-    max_steps = 500,
-    save_steps = 100,
+    max_steps = 1000,
+    save_steps = 200,
     max_grad_norm = 1.0,
     save_strategy="epoch",
     report_to = "wandb", # Can use Weights & Biases
-    output_dir = "./deepseek-math-7b-grpo-lora_v2",
+    output_dir = "./deepseek-math-7b-grpo-lora_v4",
 )
 
 
@@ -181,4 +209,4 @@ trainer = GRPOTrainer(
 )
 
 trainer.train()
-model.save_pretrained("./deepseek-math-7b-grpo-lora_v2")
+model.save_pretrained("./deepseek-math-7b-grpo-lora_v4")
