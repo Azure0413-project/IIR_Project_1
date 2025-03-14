@@ -116,8 +116,17 @@ reward_funcs = [
 ]
 
 training_args = GRPOConfig(
-    use_vllm = False, # use vLLM for fast inference!
+    #######################changeable#######################
+    num_generations = 16, # Decrease if out of memory
+    num_train_epochs = 1, # Set to 1 for a full training run
+    max_steps = 1000,
+    save_steps = 200,
+    per_device_train_batch_size = 2,
+    per_device_eval_batch_size=2,
+    gradient_accumulation_steps = 8, # Increase to 4 for smoother training
     learning_rate = 5e-6,
+    ########################################################
+    use_vllm = False, # use vLLM for fast inference!
     adam_beta1 = 0.9,
     adam_beta2 = 0.99,
     weight_decay = 0.01,
@@ -127,15 +136,8 @@ training_args = GRPOConfig(
     logging_steps = 1,
     bf16 = is_bfloat16_supported(),
     fp16 = not is_bfloat16_supported(),
-    per_device_train_batch_size = 2,
-    per_device_eval_batch_size=2,
-    gradient_accumulation_steps = 8, # Increase to 4 for smoother training
-    num_generations = 12, # Decrease if out of memory
     max_prompt_length = 512,
     max_completion_length = 512,
-    num_train_epochs = 1, # Set to 1 for a full training run
-    max_steps = 1000,
-    save_steps = 200,
     max_grad_norm = 1.0,
     save_strategy="epoch",
     report_to = "wandb", # Can use Weights & Biases
@@ -144,9 +146,9 @@ training_args = GRPOConfig(
 
 
 max_seq_length = 2048
-#####################################################
+#######################changeable#######################
 lora_rank = 16
-#####################################################
+########################################################
 model_name = "deepseek-ai/deepseek-math-7b-base"
 
 tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -188,12 +190,9 @@ def format_prompt(example):
 def get_orca_dpo_pairs_questions(split="train") -> Dataset:
     data = load_dataset('Intel/orca_dpo_pairs')[split]  # 載入資料集
     
-    #######################################################
     # Optional slicing for testing
     if len(data) > 1:
          data = data.select(range(1, len(data)))
-        # data = data.select(range(1, 2))
-    #######################################################
     
     data = data.map(format_prompt)  # Apply the SYSTEM_PROMPT formatting
     return data
