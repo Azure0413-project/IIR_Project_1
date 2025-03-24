@@ -55,7 +55,8 @@ train_dataset = train_dataset.rename_columns({"chosen": "solution"})
 ######################################################################################################################
 
 ################################################ LORA ##########################################################
-model_id = "Qwen/Qwen2-0.5B-Instruct"
+# model_id = "Qwen/Qwen2-0.5B-Instruct"
+model_id = "deepseek-ai/deepseek-math-7b-base"
 
 model = AutoModelForCausalLM.from_pretrained(
     model_id,
