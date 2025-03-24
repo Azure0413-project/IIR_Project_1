@@ -12,14 +12,17 @@ SYSTEM_PROMPT = (
     "<think> reasoning process here </think><answer> answer here </answer>"
 )
 
+################################################ DATASET ##########################################################
+# renew the environment, already update new version of requirement.txt
 from datasets import load_dataset, Dataset
 import torch, re
 from transformers import AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
 from math_verify import LatexExtractionConfig, parse, verify
 from trl import GRPOConfig, GRPOTrainer
+######################################################################################################################
 
-################################################ DATASET ##########################################################
+######################################################################################################################
 # dataset_id = "AI-MO/NuminaMath-TIR"
 # train_dataset, test_dataset = load_dataset(dataset_id, split=["train[:5%]", "test[:5%]"])
 dataset_id = "Intel/orca_dpo_pairs"
