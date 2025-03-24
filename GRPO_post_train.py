@@ -17,7 +17,9 @@ import torch, re
 from transformers import AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
 from math_verify import LatexExtractionConfig, parse, verify
+from trl import GRPOConfig, GRPOTrainer
 
+################################################ DATASET ##########################################################
 # dataset_id = "AI-MO/NuminaMath-TIR"
 # train_dataset, test_dataset = load_dataset(dataset_id, split=["train[:5%]", "test[:5%]"])
 dataset_id = "Intel/orca_dpo_pairs"
@@ -47,7 +49,9 @@ test_dataset = test_dataset.remove_columns(["system", "rejected", "question"])
 train_dataset = train_dataset.rename_columns({"chosen": "solution"})
 # print(train_dataset)
 # print(type(train_dataset))
+######################################################################################################################
 
+################################################ LORA ##########################################################
 model_id = "Qwen/Qwen2-0.5B-Instruct"
 
 model = AutoModelForCausalLM.from_pretrained(
@@ -65,7 +69,9 @@ lora_config = LoraConfig(
 )
 model = get_peft_model(model, lora_config)
 model.print_trainable_parameters()
+######################################################################################################################
 
+################################################ GRPO TRAINING ##########################################################
 def format_reward(completions, **kwargs):
     """Reward function that checks if the completion has a specific format."""
     pattern = r"^<think>.*?</think>\s*<answer>.*?</answer>$"
@@ -93,8 +99,6 @@ def accuracy_reward(completions, **kwargs):
             rewards.append(1.0)
     return rewards
 
-from trl import GRPOConfig
-
 # Configure training arguments using GRPOConfig
 training_args = GRPOConfig(
     output_dir=output_dir,
@@ -114,8 +118,6 @@ training_args = GRPOConfig(
     save_steps=50,
 )
 
-from trl import GRPOTrainer
-
 trainer = GRPOTrainer(
     model=model,
     reward_funcs=[format_reward, accuracy_reward],
@@ -126,7 +128,7 @@ trainer = GRPOTrainer(
 )
 
 trainer.train()
-
 trainer.save_model(training_args.output_dir)
 model.save_pretrained(training_args.output_dir)
 # trainer.push_to_hub(dataset_name=dataset_id)
+######################################################################################################################
