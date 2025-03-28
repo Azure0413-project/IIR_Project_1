@@ -61,11 +61,11 @@ model = FastLanguageModel.get_peft_model(
 
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 tokenizer.pad_token = tokenizer.eos_token 
-tokenizer.chat_template = """{% for message in messages %}
-{% if message['role'] == 'system' %}System: {{ message['content'] }}
-{% elif message['role'] == 'user' %}User: {{ message['content'] }}
-{% elif message['role'] == 'assistant' %}Assistant: <think>{{ message['content'].split('<answer>')[0].strip() }}</think><answer>{{ message['content'].split('<answer>')[-1].strip() }}</answer>
-{% endif %}{% endfor %}"""
+tokenizer.chat_template = """<s>[INST] <<SYS>>
+{{ system_message }}
+<</SYS>>
+
+{{ user_message }} [/INST] Assistant: <think>{{ assistant_reasoning }}</think><answer>{{ assistant_answer }}</answer> </s>"""
 
 model.print_trainable_parameters()
 
@@ -114,7 +114,8 @@ training_args = GRPOConfig(
     # Parameters related to reporting and saving
     report_to="wandb",
     logging_steps=1,
-    # push_to_hub=True,
+    evaluation_strategy="steps",
+    eval_steps=10,  # Evaluate every 10 steps
     save_strategy="steps",
     save_steps=10,
     ####################################################################################################################
@@ -132,7 +133,14 @@ trainer = GRPOTrainer(
     eval_dataset = test_dataset
 )
 
+# Monitor gradients and parameters with wandb
+wandb.watch(model, log="all")
+
 trainer.train()
+
+# Evaluate and log results
+eval_results = trainer.evaluate()
+wandb.log(eval_results)
 
 trainer.save_model(training_args.output_dir)
 model.save_pretrained(training_args.output_dir)
