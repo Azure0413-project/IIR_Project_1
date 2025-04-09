@@ -1,0 +1,7 @@
+選擇題
+haonan-li/cmmlu
+中文常識
+voidful/ReClor
+中文邏輯推理
+jiacheng-ye/logiqa-zh
+中文邏輯閱讀
