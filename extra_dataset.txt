@@ -1,10 +1,19 @@
-選擇題
 haonan-li/cmmlu
+evaluation(https://github.com/EleutherAI/lm-evaluation-harness
+https://github.com/InternLM/opencompass)
+leaderboard(https://github.com/haonan-li/CMMLU)
 中文常識
+
 voidful/ReClor
-中文邏輯推理
+英文邏輯推理
+
 jiacheng-ye/logiqa-zh
-中文邏輯閱讀
+簡中邏輯閱讀
+
+https://github.com/DRCKnowledgeTeam/DRCD
+繁中閱讀
+
+
 
 ** Few shot prompt for mmlu **
 Problem:
