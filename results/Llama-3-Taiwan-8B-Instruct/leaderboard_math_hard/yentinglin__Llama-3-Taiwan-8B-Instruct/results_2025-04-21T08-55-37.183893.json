@@ -1,0 +1,562 @@
+{
+  "results": {
+    "leaderboard_math_hard": {
+      "exact_match,none": 0.07930513595166164,
+      "exact_match_stderr,none": 0.007221564053252859,
+      "alias": "leaderboard_math_hard"
+    },
+    "leaderboard_math_algebra_hard": {
+      "alias": " - leaderboard_math_algebra_hard",
+      "exact_match,none": 0.1498371335504886,
+      "exact_match_stderr,none": 0.020403284286426838,
+      "exact_match_original,none": 0.14332247557003258,
+      "exact_match_original_stderr,none": 0.02003111497672598
+    },
+    "leaderboard_math_counting_and_prob_hard": {
+      "alias": " - leaderboard_math_counting_and_prob_hard",
+      "exact_match,none": 0.04065040650406504,
+      "exact_match_stderr,none": 0.017878907564437472,
+      "exact_match_original,none": 0.04065040650406504,
+      "exact_match_original_stderr,none": 0.017878907564437472
+    },
+    "leaderboard_math_geometry_hard": {
+      "alias": " - leaderboard_math_geometry_hard",
+      "exact_match,none": 0.007575757575757576,
+      "exact_match_stderr,none": 0.00757575757575756,
+      "exact_match_original,none": 0.015151515151515152,
+      "exact_match_original_stderr,none": 0.010672768637174741
+    },
+    "leaderboard_math_intermediate_algebra_hard": {
+      "alias": " - leaderboard_math_intermediate_algebra_hard",
+      "exact_match,none": 0.02857142857142857,
+      "exact_match_stderr,none": 0.009973998820736,
+      "exact_match_original,none": 0.02142857142857143,
+      "exact_match_original_stderr,none": 0.008669434577665572
+    },
+    "leaderboard_math_num_theory_hard": {
+      "alias": " - leaderboard_math_num_theory_hard",
+      "exact_match,none": 0.045454545454545456,
+      "exact_match_stderr,none": 0.016839967582612497,
+      "exact_match_original,none": 0.03896103896103896,
+      "exact_match_original_stderr,none": 0.0156437204516503
+    },
+    "leaderboard_math_prealgebra_hard": {
+      "alias": " - leaderboard_math_prealgebra_hard",
+      "exact_match,none": 0.18134715025906736,
+      "exact_match_stderr,none": 0.02780703236068609,
+      "exact_match_original,none": 0.17098445595854922,
+      "exact_match_original_stderr,none": 0.02717121368316453
+    },
+    "leaderboard_math_precalculus_hard": {
+      "alias": " - leaderboard_math_precalculus_hard",
+      "exact_match,none": 0.022222222222222223,
+      "exact_match_stderr,none": 0.012733899715059671,
+      "exact_match_original,none": 0.02962962962962963,
+      "exact_match_original_stderr,none": 0.014648038602753797
+    }
+  },
+  "groups": {
+    "leaderboard_math_hard": {
+      "exact_match,none": 0.07930513595166164,
+      "exact_match_stderr,none": 0.007221564053252859,
+      "alias": "leaderboard_math_hard"
+    }
+  },
+  "group_subtasks": {
+    "leaderboard_math_hard": [
+      "leaderboard_math_algebra_hard",
+      "leaderboard_math_counting_and_prob_hard",
+      "leaderboard_math_geometry_hard",
+      "leaderboard_math_intermediate_algebra_hard",
+      "leaderboard_math_num_theory_hard",
+      "leaderboard_math_prealgebra_hard",
+      "leaderboard_math_precalculus_hard"
+    ]
+  },
+  "configs": {
+    "leaderboard_math_algebra_hard": {
+      "task": "leaderboard_math_algebra_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "algebra",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4d66c160>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_counting_and_prob_hard": {
+      "task": "leaderboard_math_counting_and_prob_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "counting_and_probability",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4de75ab0>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_geometry_hard": {
+      "task": "leaderboard_math_geometry_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "geometry",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4de71750>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_intermediate_algebra_hard": {
+      "task": "leaderboard_math_intermediate_algebra_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "intermediate_algebra",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4de70a60>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_num_theory_hard": {
+      "task": "leaderboard_math_num_theory_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "number_theory",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4ddb5000>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_prealgebra_hard": {
+      "task": "leaderboard_math_prealgebra_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "prealgebra",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fda4ddcbf40>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    },
+    "leaderboard_math_precalculus_hard": {
+      "task": "leaderboard_math_precalculus_hard",
+      "dataset_path": "DigitalLearningGmbH/MATH-lighteval",
+      "dataset_name": "precalculus",
+      "dataset_kwargs": {
+        "trust_remote_code": true
+      },
+      "training_split": "train",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset: datasets.Dataset) -> datasets.Dataset:\n    def _process_doc(doc: dict) -> dict:\n        out_doc = {\n            \"problem\": doc[\"problem\"],\n            \"solution\": doc[\"solution\"],\n            \"answer\": remove_boxed(last_boxed_only_string(doc[\"solution\"])),\n        }\n        if getattr(doc, \"few_shot\", None) is not None:\n            out_doc[\"few_shot\"] = True\n        return out_doc\n\n    return dataset.filter(lambda x: x[\"level\"] == \"Level 5\").map(_process_doc)\n",
+      "doc_to_text": "def doc_to_text(doc: dict) -> str:\n    return \"Problem:\" + \"\\n\" + doc[\"problem\"] + \"\\n\\n\" + \"Solution:\"\n",
+      "doc_to_target": "{{answer if few_shot is undefined else solution}}",
+      "unsafe_code": false,
+      "process_results": "def process_results(doc: dict, results: List[str]) -> Dict[str, int]:\n    candidates = results[0]\n    parsed_candidate = parse(candidates)\n    parsed_answer = parse(doc[\"solution\"], extraction_config=[LatexExtractionConfig()])\n    if verify(parsed_answer, parsed_candidate):\n        retval = 1\n    else:\n        retval = 0\n\n    try:\n        original = process_result_v1(doc, candidates)\n    except:  # noqa: E722\n        original = 0\n\n    output = {\n        \"exact_match\": retval,\n        \"exact_match_original\": original,\n    }\n    return output\n",
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "fewshot_config": {
+        "sampler": "first_n",
+        "samples": "<function list_fewshot_samples at 0x7fde1e83d750>"
+      },
+      "num_fewshot": 4,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "exact_match_original",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "until": [
+          "Problem:"
+        ],
+        "do_sample": false,
+        "temperature": 0.0,
+        "max_gen_toks": 1024
+      },
+      "repeats": 1,
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 3.0,
+        "pretrained": "yentinglin/Llama-3-Taiwan-8B-Instruct"
+      }
+    }
+  },
+  "versions": {
+    "leaderboard_math_algebra_hard": 3.0,
+    "leaderboard_math_counting_and_prob_hard": 3.0,
+    "leaderboard_math_geometry_hard": 3.0,
+    "leaderboard_math_hard": null,
+    "leaderboard_math_intermediate_algebra_hard": 3.0,
+    "leaderboard_math_num_theory_hard": 3.0,
+    "leaderboard_math_prealgebra_hard": 3.0,
+    "leaderboard_math_precalculus_hard": 3.0
+  },
+  "n-shot": {
+    "leaderboard_math_algebra_hard": 4,
+    "leaderboard_math_counting_and_prob_hard": 4,
+    "leaderboard_math_geometry_hard": 4,
+    "leaderboard_math_intermediate_algebra_hard": 4,
+    "leaderboard_math_num_theory_hard": 4,
+    "leaderboard_math_prealgebra_hard": 4,
+    "leaderboard_math_precalculus_hard": 4
+  },
+  "higher_is_better": {
+    "leaderboard_math_algebra_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_counting_and_prob_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_geometry_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_intermediate_algebra_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_num_theory_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_prealgebra_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    },
+    "leaderboard_math_precalculus_hard": {
+      "exact_match": true,
+      "exact_match_original": true
+    }
+  },
+  "n-samples": {
+    "leaderboard_math_algebra_hard": {
+      "original": 307,
+      "effective": 307
+    },
+    "leaderboard_math_counting_and_prob_hard": {
+      "original": 123,
+      "effective": 123
+    },
+    "leaderboard_math_geometry_hard": {
+      "original": 132,
+      "effective": 132
+    },
+    "leaderboard_math_intermediate_algebra_hard": {
+      "original": 280,
+      "effective": 280
+    },
+    "leaderboard_math_num_theory_hard": {
+      "original": 154,
+      "effective": 154
+    },
+    "leaderboard_math_prealgebra_hard": {
+      "original": 193,
+      "effective": 193
+    },
+    "leaderboard_math_precalculus_hard": {
+      "original": 135,
+      "effective": 135
+    }
+  },
+  "config": {
+    "model": "hf",
+    "model_args": "pretrained=yentinglin/Llama-3-Taiwan-8B-Instruct",
+    "model_num_parameters": 8030277632,
+    "model_dtype": "torch.bfloat16",
+    "model_revision": "main",
+    "model_sha": "6e78b60dcd134c0b6b14d0cffe682eece83a05d3",
+    "batch_size": 1,
+    "batch_sizes": [],
+    "device": null,
+    "use_cache": null,
+    "limit": null,
+    "bootstrap_iters": 100000,
+    "gen_kwargs": null,
+    "random_seed": 0,
+    "numpy_seed": 1234,
+    "torch_seed": 1234,
+    "fewshot_seed": 1234
+  },
+  "git_hash": null,
+  "date": 1745204292.8649175,
+  "pretty_env_info": "PyTorch version: 2.5.1+cu124\nIs debug build: False\nCUDA used to build PyTorch: 12.4\nROCM used to build PyTorch: N/A\n\nOS: Ubuntu 22.04.2 LTS (x86_64)\nGCC version: (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0\nClang version: Could not collect\nCMake version: version 3.27.1\nLibc version: glibc-2.35\n\nPython version: 3.10.12 (main, Jun 11 2023, 05:26:28) [GCC 11.4.0] (64-bit runtime)\nPython platform: Linux-5.4.0-211-generic-x86_64-with-glibc2.35\nIs CUDA available: True\nCUDA runtime version: 12.2.128\nCUDA_MODULE_LOADING set to: LAZY\nGPU models and configuration: GPU 0: NVIDIA TITAN RTX\nNvidia driver version: 545.23.08\ncuDNN version: Probably one of the following:\n/usr/lib/x86_64-linux-gnu/libcudnn.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_adv_infer.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_adv_train.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_cnn_infer.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_cnn_train.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_ops_infer.so.8.9.4\n/usr/lib/x86_64-linux-gnu/libcudnn_ops_train.so.8.9.4\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nArchitecture:                       x86_64\nCPU op-mode(s):                     32-bit, 64-bit\nAddress sizes:                      39 bits physical, 48 bits virtual\nByte Order:                         Little Endian\nCPU(s):                             16\nOn-line CPU(s) list:                0-15\nVendor ID:                          GenuineIntel\nModel name:                         Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz\nCPU family:                         6\nModel:                              165\nThread(s) per core:                 2\nCore(s) per socket:                 8\nSocket(s):                          1\nStepping:                           5\nCPU max MHz:                        4800.0000\nCPU min MHz:                        800.0000\nBogoMIPS:                           5799.77\nFlags:                              fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm pcid sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb invpcid_single ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow vnmi flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid mpx rdseed adx smap clflushopt intel_pt xsaveopt xsavec xgetbv1 xsaves dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp pku ospke md_clear flush_l1d arch_capabilities\nVirtualization:                     VT-x\nL1d cache:                          256 KiB (8 instances)\nL1i cache:                          256 KiB (8 instances)\nL2 cache:                           2 MiB (8 instances)\nL3 cache:                           16 MiB (1 instance)\nNUMA node(s):                       1\nNUMA node0 CPU(s):                  0-15\nVulnerability Gather data sampling: Mitigation; Microcode\nVulnerability Itlb multihit:        KVM: Vulnerable\nVulnerability L1tf:                 Not affected\nVulnerability Mds:                  Not affected\nVulnerability Meltdown:             Not affected\nVulnerability Mmio stale data:      Mitigation; Clear CPU buffers; SMT vulnerable\nVulnerability Retbleed:             Mitigation; Enhanced IBRS\nVulnerability Spec store bypass:    Mitigation; Speculative Store Bypass disabled via prctl and seccomp\nVulnerability Spectre v1:           Mitigation; usercopy/swapgs barriers and __user pointer sanitization\nVulnerability Spectre v2:           Mitigation; Enhanced / Automatic IBRS; IBPB conditional; RSB filling; PBRSB-eIBRS SW sequence; BHI SW loop, KVM SW loop\nVulnerability Srbds:                Mitigation; Microcode\nVulnerability Tsx async abort:      Not affected\n\nVersions of relevant libraries:\n[pip3] numpy==1.26.4\n[pip3] onnx==1.14.0\n[pip3] pytorch-quantization==2.1.2\n[pip3] torch==2.5.1\n[pip3] torch-tensorrt==2.0.0.dev0\n[pip3] torchaudio==2.5.1\n[pip3] torchdata==0.7.0a0\n[pip3] torchtext==0.16.0a0\n[pip3] torchvision==0.20.1\n[pip3] triton==3.1.0\n[conda] Could not collect",
+  "transformers_version": "4.51.2",
+  "lm_eval_version": "0.4.8",
+  "upper_git_hash": null,
+  "tokenizer_pad_token": [
+    "<|end_of_text|>",
+    "128001"
+  ],
+  "tokenizer_eos_token": [
+    "<|eot_id|>",
+    "128009"
+  ],
+  "tokenizer_bos_token": [
+    "<|begin_of_text|>",
+    "128000"
+  ],
+  "eot_token_id": 128009,
+  "max_length": 8192,
+  "task_hashes": {},
+  "model_source": "hf",
+  "model_name": "yentinglin/Llama-3-Taiwan-8B-Instruct",
+  "model_name_sanitized": "yentinglin__Llama-3-Taiwan-8B-Instruct",
+  "system_instruction": null,
+  "system_instruction_sha": null,
+  "fewshot_as_multiturn": false,
+  "chat_template": null,
+  "chat_template_sha": null,
+  "start_time": 1810922.290200823,
+  "end_time": 1832369.120101799,
+  "total_evaluation_time_seconds": "21446.829900976038"
+}
